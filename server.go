@@ -5,16 +5,18 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
 func Response(w http.ResponseWriter, r *http.Request, args ServerArgs) {
 	// Check if file exists and is not a directory
-	if fileInfo, err := os.Stat(args.Directory + r.URL.Path); err != nil {
+	path := filepath.Clean(r.URL.Path)
+	if fileInfo, err := os.Stat(args.Directory + path); err != nil {
 		http.NotFound(w, r)
 		return
 	} else if fileInfo.IsDir() {
-		files, err := os.ReadDir(args.Directory + r.URL.Path)
+		files, err := os.ReadDir(args.Directory + path)
 		if err != nil {
 			http.Error(w, "Error reading directory", http.StatusInternalServerError)
 			return
@@ -35,18 +37,18 @@ func Response(w http.ResponseWriter, r *http.Request, args ServerArgs) {
 			Path  string
 			Files []string
 		}{
-			Path:  strings.TrimRight(r.URL.Path, "/"),
+			Path:  strings.TrimRight(path, "/"),
 			Files: fileNames,
 		})
 		return
 	}
 
 	// Set the header and write the file content
-	filename := strings.Split(r.URL.Path, "/")[0]
+	filename := strings.Split(path, "/")[0]
 
 	w.Header().Set("Content-Disposition", "attachment; filename="+filename)
 	w.Header().Set("Content-Type", "application/octet-stream")
-	file, err := os.Open(args.Directory + r.URL.Path)
+	file, err := os.Open(args.Directory + path)
 	if err != nil {
 		http.Error(w, "File not found.", 404)
 		return
@@ -70,6 +72,7 @@ func main() {
 	}
 
 	if args.TLSCertFile != "" && args.TLSKeyFile != "" {
+
 		http.ListenAndServeTLS(":"+args.Port, args.TLSCertFile, args.TLSKeyFile, nil)
 	}
 
