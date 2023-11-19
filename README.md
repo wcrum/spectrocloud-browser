@@ -1,6 +1,3 @@
-
-
-
 | Environmental Variable | Default | Description |
 | -- | -- | -- |
 | TLS_CERT_FILE | none | Cert file location for TLS Cert  |
