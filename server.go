@@ -12,11 +12,11 @@ import (
 func Response(w http.ResponseWriter, r *http.Request, args ServerArgs) {
 	// Check if file exists and is not a directory
 	path := filepath.Clean(r.URL.Path)
-	if fileInfo, err := os.Stat(args.Directory + path); err != nil {
+	if fileInfo, err := os.Stat(args.Volume + path); err != nil {
 		http.NotFound(w, r)
 		return
 	} else if fileInfo.IsDir() {
-		files, err := os.ReadDir(args.Directory + path)
+		files, err := os.ReadDir(args.Volume + path)
 		if err != nil {
 			http.Error(w, "Error reading directory", http.StatusInternalServerError)
 			return
@@ -48,7 +48,7 @@ func Response(w http.ResponseWriter, r *http.Request, args ServerArgs) {
 
 	w.Header().Set("Content-Disposition", "attachment; filename="+filename)
 	w.Header().Set("Content-Type", "application/octet-stream")
-	file, err := os.Open(args.Directory + path)
+	file, err := os.Open(args.Volume + path)
 	if err != nil {
 		http.Error(w, "File not found.", 404)
 		return
@@ -58,10 +58,9 @@ func Response(w http.ResponseWriter, r *http.Request, args ServerArgs) {
 }
 
 func main() {
-
 	args := NewServerArgs()
 
-	if args.Directory == "basic" {
+	if args.Auth == "basic" {
 		http.Handle("/", BasicAuthMiddleware(args, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			Response(w, r, args)
 		})))
@@ -72,7 +71,6 @@ func main() {
 	}
 
 	if args.TLSCertFile != "" && args.TLSKeyFile != "" {
-
 		http.ListenAndServeTLS(":"+args.Port, args.TLSCertFile, args.TLSKeyFile, nil)
 	}
 

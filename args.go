@@ -7,7 +7,7 @@ type ServerArgs struct {
 	Password    string
 	Auth        string
 	Port        string
-	Directory   string
+	Volume      string
 	TLSCertFile string
 	TLSKeyFile  string
 }
@@ -27,7 +27,7 @@ func NewServerArgs() ServerArgs {
 	args.Password = GetEnvOrDefault("SCAR_PASSWORD", "spectro")
 	args.Auth = GetEnvOrDefault("SCAR_AUTH", "none")
 	args.Port = GetEnvOrDefault("SCAR_PORT", "8080")
-	args.Directory = GetEnvOrDefault("SCAR_DIRECTORY", "./public")
+	args.Volume = GetEnvOrDefault("SCAR_VOLUME", "./public")
 	args.TLSCertFile = GetEnvOrDefault("SCAR_TLS_CERT", "")
 	args.TLSKeyFile = GetEnvOrDefault("SCAR_TLS_KEY", "")
 
